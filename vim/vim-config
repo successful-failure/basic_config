@@ -1,0 +1,49 @@
+call plug#begin()
+Plug 'benmills/vimux'
+Plug 'christoomey/vim-tmux-navigator'
+
+" snipets
+Plug 'sirver/ultisnips'
+
+" theme
+Plug 'glepnir/oceanic-material'
+
+" file manager
+Plug 'preservim/nerdtree'
+
+" search file 
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+
+" vim sensible
+Plug 'tpope/vim-sensible'
+
+" functions/classes/variables list
+Plug 'preservim/tagbar'
+call plug#end()
+
+
+" --- SHORT CUTS
+
+nmap <C-f> :NERDTreeToggle<CR>
+
+" --- config
+
+" TAGBAR
+nmap <F8> :TagbarToggle<CR>
+" VIM-COMMENTARY
+filetype plugin indent on
+
+" --- Basic config
+
+
+set number
+set relativenumber
+set tabstop=4
+set shiftwidth=4
+set autoindent
+set mouse=a
+colorscheme oceanic_material
+filetype on
+" -- OPEN VIM
+autocmd VimEnter * NERDTree
