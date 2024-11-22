@@ -1,0 +1,57 @@
+" --- LOAD PLUGGINS 
+
+if filereadable(expand("~/.vim.plug"))
+	source ~/.vim.plug
+endif
+
+if filereadable(expand("~/.vim.vundle"))
+	source ~/.vim.vundle
+endif
+
+" ---<< FZF 
+
+nmap <C-d> :Files .<CR>
+
+" ---<< TAGBAR
+
+nmap <F8> :TagbarToggle<CR>
+
+" ---<< search plus ultra 
+map /  <Plug>(incsearch-forward)
+map ?  <Plug>(incsearch-backward)
+map g/ <Plug>(incsearch-stay)
+" :h g:incsearch#auto_nohlsearch
+set hlsearch
+let g:incsearch#auto_nohlsearch = 1
+map n  <Plug>(incsearch-nohl-n)
+map N  <Plug>(incsearch-nohl-N)
+map *  <Plug>(incsearch-nohl-*)
+map #  <Plug>(incsearch-nohl-#)
+map g* <Plug>(incsearch-nohl-g*)
+map g# <Plug>(incsearch-nohl-g#)
+" ---<< CONFIG 
+
+" Movement
+set number
+set relativenumber
+set tabstop=4
+set shiftwidth=4
+set autoindent
+set mouse=a
+
+filetype plugin indent on
+
+" Theme
+
+syntax enable
+set background=dark
+colorscheme gruvbox
+set termguicolors
+filetype on
+
+" ---<< NERDTree
+
+" init vim
+autocmd VimEnter * NERDTree
+
+nmap <C-f> :NERDTreeToggle<CR>
