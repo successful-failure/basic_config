@@ -16,6 +16,9 @@ nmap <C-d> :Files .<CR>
 
 nmap <F8> :TagbarToggle<CR>
 
+" ---<< Silver Search
+let g:ackprg = 'ag --nogroup --nocolor --column'
+
 " ---<< search plus ultra 
 map /  <Plug>(incsearch-forward)
 map ?  <Plug>(incsearch-backward)
@@ -31,6 +34,69 @@ map g* <Plug>(incsearch-nohl-g*)
 map g# <Plug>(incsearch-nohl-g#)
 " ---<< CONFIG 
 
+" Sessions
+" --- Configuración de sesiones automáticas por directorio ---
+
+" Carpeta donde se guardarán las sesiones
+let g:session_dir = expand('~/.vim/sessions')
+
+" Crear el directorio si no existe
+if !isdirectory(g:session_dir)
+  call mkdir(g:session_dir, 'p')
+endif
+
+" Nombre del directorio actual (último componente de cwd)
+function! s:SessionName()
+  return substitute(getcwd(), '/', '_', 'g')
+endfunction
+
+" Archivo completo de la sesión
+function! s:SessionFile()
+  return g:session_dir . '/' . s:SessionName() . '.vim'
+endfunction
+
+function! s:Coloration()
+  " Guardar el buffer actual
+  let l:curbuf = bufnr('%')
+
+  " Ejecutar la detección en todos
+  silent! bufdo filetype detect | syntax enable
+
+  " Volver al buffer original
+  if bufexists(l:curbuf)
+    execute 'silent! buffer ' . l:curbuf
+  endif
+endfunction
+
+" --- Cargar sesión y restaurar highlighting correctamente ---
+autocmd VimEnter * if argc() == 0 && filereadable(s:SessionFile()) |
+      \ silent! execute 'source ' . s:SessionFile() |
+      \ call timer_start(500, { -> s:Coloration() }) |
+      \ endif
+
+" Clean Session
+function! CleanSession()
+  " Guarda la pestaña actual para volver a ella después
+  let l:curtab = tabpagenr()
+
+  " Itera por todas las tabs
+  for l:i in range(1, tabpagenr('$'))
+    execute 'tabnext ' . l:i
+    " Cierra NERDTree si está abierto en esta tab
+    if exists('t:NERDTreeBufName')
+      silent! NERDTreeClose
+    endif
+  endfor
+
+  " Regresa a la pestaña original
+  execute 'tabnext ' . l:curtab
+
+  " Finalmente guarda la sesión
+  execute 'mksession! ' . s:SessionFile()
+endfunction
+
+autocmd VimLeavePre * if !exists('g:no_session') | call CleanSession() | endif
+
 " Movement
 set number
 set relativenumber
@@ -38,7 +104,14 @@ set tabstop=4
 set shiftwidth=4
 set autoindent
 set mouse=a
+nnoremap <space> za
+set viewoptions=folds,cursor,slash,unix
+" Guardar folds y más al salir
+autocmd BufWinLeave * silent! mkview
 
+" Restaurar folds y más al abrir
+autocmd BufWinEnter * silent! loadview
+set foldcolumn=1
 filetype plugin indent on
 
 " Theme
@@ -48,10 +121,7 @@ set background=dark
 colorscheme gruvbox
 set termguicolors
 filetype on
-
+autocmd VimResized * wincmd =
 " ---<< NERDTree
-
-" init vim
-autocmd VimEnter * NERDTree
 
 nmap <C-f> :NERDTreeToggle<CR>

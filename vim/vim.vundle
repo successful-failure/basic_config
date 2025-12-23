@@ -8,6 +8,8 @@ call vundle#begin()
 " Lista de plugins gestionados por Vundle
 Plugin 'VundleVim/Vundle.vim'
 
+" plug for search ( silver_search )
+Plugin 'mileszs/ack.vim'
 
 Plugin 'jiangmiao/auto-pairs'
 call vundle#end()            " required

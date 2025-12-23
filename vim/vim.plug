@@ -6,6 +6,12 @@ Plug 'christoomey/vim-tmux-navigator'
 " comment codes
 Plug 'tpope/vim-commentary'
 
+" plug for search ( silver_search )
+" Plug 'mileszs/ack.vim'
+
+" git in vim
+Plug 'tpope/vim-fugitive'
+
 " search plus ultra
 Plug 'haya14busa/incsearch.vim'
 

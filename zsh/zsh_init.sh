@@ -1,45 +1,107 @@
 #!/usr/bin/env bash
 
-set -e
+set -Eeuo pipefail
 
-echo "System update..."
-sudo apt update && sudo apt upgrade -y
-sudo apt autoremove -y
-sudo apt autoclean -y
+#######################################
+# Utils
+#######################################
+
+info() {
+  echo -e "\e[1;34m[INFO]\e[0m $1"
+}
+
+warn() {
+  echo -e "\e[1;33m[WARN]\e[0m $1"
+}
+
+error() {
+  echo -e "\e[1;31m[ERROR]\e[0m $1"
+  exit 1
+}
+
+#######################################
+# Checks
+#######################################
+
+if ! command -v pacman &>/dev/null; then
+  error "This script is intended for Arch-based systems (EndeavourOS)."
+fi
+
+#######################################
+# System update
+#######################################
+
+info "Updating system..."
+sudo pacman -Syu --noconfirm
+
+#######################################
+# Packages
+#######################################
 
 tools=(
-    git
-	tree
-	universal-ctags
-	fzf
-	batcat
-    curl
-	xclip
-    wget
-    vim
-    btop
+  git
+  tree
+  ctags
+  fzf
+  bat
+  curl
+  xclip
+  wget
+  vim
+  btop
 )
 
-echo "Installing tools..."
+info "Installing tools..."
+
 for tool in "${tools[@]}"; do
-    if ! command -v $tool &> /dev/null; then
-        echo "Installing $tool..."
-        sudo apt install -y $tool
-    else
-        echo "$tool already install."
-    fi
+  if pacman -Qi "$tool" &>/dev/null; then
+    info "$tool already installed"
+  else
+    info "Installing $tool"
+    sudo pacman -S --noconfirm "$tool"
+  fi
 done
 
-echo "Cloning dependencies..."
-git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+#######################################
+# Zsh plugins
+#######################################
 
-echo "Copy zshrc"
-cp ./zshrc ~/.zshrc 
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+PLUGINS_DIR="$ZSH_CUSTOM/plugins"
 
-echo "Git config..."
+info "Installing zsh plugins..."
 
-echo "Set default branch main"
+declare -A zsh_plugins=(
+  [zsh-autosuggestions]="https://github.com/zsh-users/zsh-autosuggestions"
+  [zsh-syntax-highlighting]="https://github.com/zsh-users/zsh-syntax-highlighting"
+)
+
+for plugin in "${!zsh_plugins[@]}"; do
+  if [[ -d "$PLUGINS_DIR/$plugin" ]]; then
+    info "$plugin already exists"
+  else
+    git clone "${zsh_plugins[$plugin]}" "$PLUGINS_DIR/$plugin"
+  fi
+done
+
+#######################################
+# Zshrc
+#######################################
+
+if [[ -f "$HOME/.zshrc" ]]; then
+  warn "Backing up existing .zshrc"
+  cp "$HOME/.zshrc" "$HOME/.zshrc.bak.$(date +%s)"
+fi
+
+info "Copying .zshrc"
+cp ./zshrc "$HOME/.zshrc"
+
+#######################################
+# Git config
+#######################################
+
+info "Configuring git..."
 git config --global init.defaultBranch main
 
+info "Setup completed successfully 🎉"
 
